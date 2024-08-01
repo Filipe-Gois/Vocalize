@@ -1,0 +1,18 @@
+Tradução de Texto para Fala : 
+Os usuários podem inserir texto em um campo de entrada. 
+Ao pressionar um botão de “Traduzir para Fala”, o texto é enviado para o serviço de tradução cognitiva. 
+O serviço retorna a fala correspondente ao texto traduzido.
+A fala é reproduzida pelo dispositivo.
+
+Tradução de Fala para Texto :
+Os usuários podem pressionar um botão de “Início de Gravação” para iniciar a gravação de sua fala. 
+Depois que a fala é gravada, ela é enviada para o serviço de tradução cognitiva.
+O serviço retorna o texto correspondente à fala traduzida. 
+O texto é exibido em um campo de saída.
+Tecnologias Utilizadas:
+React Native: Para o desenvolvimento do aplicativo móvel.
+Expo: Para facilitar o desenvolvimento e fornecer acesso a APIs e bibliotecas.
+Serviço Cognitivo de Tradução: Um serviço de terceiros para tradução de texto para fala e fala para texto. (Exemplo: Microsoft Azure Cognitive Services, Google Cloud Speech-to-Text e Text-to-Speech, etc.)
+
+Desafio:
+Faça o build da aplicação e gere a apk do app.
