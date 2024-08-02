@@ -12,9 +12,58 @@ namespace Vocalize_Api.Repositories
         private readonly string idioma = "pt-BR";
 
         // Método auxiliar para lidar com detalhes do cancelamento
-        private static string HandleCancellation(TranslationRecognitionResult result)
+
+        public async Task<string> FalaParaTexto(string audioUri)
         {
-            CancellationDetails cancellation = CancellationDetails.FromResult(result);
+            if (string.IsNullOrEmpty(audioUri))
+            {
+                throw new Exception("Nenhum arquivo inserido.");
+            }
+
+            try
+            {
+
+                // Crie um PushAudioInputStream e um AudioConfig a partir dele.
+                var pushStream = new PushAudioInputStream();
+                using (var audioConfig = AudioConfig.FromStreamInput(pushStream))
+                {
+                    // Leia o conteúdo do MemoryStream e escreva no PushAudioInputStream.
+                    await WriteStreamToPushAudioInputStreamAsync(audioStream, pushStream);
+
+                    // Configure o SpeechConfig e crie um SpeechRecognizer.
+                    var speechConfig = SpeechConfig.FromSubscription(speechKey, speechRegion);
+                    speechConfig.SpeechRecognitionLanguage = "en-US"; // Defina o idioma de reconhecimento.
+
+                    using var recognizer = new SpeechRecognizer(speechConfig, audioConfig);
+
+                    // Execute o reconhecimento de fala.
+                    var result = await recognizer.RecognizeOnceAsync();
+
+                    // Verifique o resultado do reconhecimento.
+                    return result.Reason switch
+                    {
+                        ResultReason.RecognizedSpeech => result.Text,
+                        ResultReason.NoMatch => "No speech could be recognized.",
+                        ResultReason.Canceled => HandleCancellation(result),
+                        _ => "An unknown error occurred."
+                    };
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public string TextoParaFala()
+        {
+            throw new NotImplementedException();
+        }
+
+        private string HandleCancellation(SpeechRecognitionResult result)
+        {
+            var cancellation = CancellationDetails.FromResult(result);
             string errorMessage = $"A tradução foi cancelada. Motivo: {cancellation.Reason}";
 
             if (cancellation.Reason == CancellationReason.Error)
@@ -22,50 +71,20 @@ namespace Vocalize_Api.Repositories
                 errorMessage += $" Código de erro: {cancellation.ErrorCode}. Detalhes: {cancellation.ErrorDetails}";
             }
 
-            throw new Exception(errorMessage);
+            return errorMessage;
         }
 
-        public async Task<string> FalaParaTexto(Stream audioStream, bool isFile)
+
+        private string OutputSpeechRecognitionResult(SpeechRecognitionResult result)
         {
-            SpeechTranslationConfig speechTranslationConfig = SpeechTranslationConfig.FromSubscription(speechKey, speechRegion);
-            speechTranslationConfig.SpeechRecognitionLanguage = idioma;
-            speechTranslationConfig.AddTargetLanguage(idioma);
-
-
-            // Cria o PushAudioInputStream
-            PushAudioInputStream pushStream = AudioInputStream.CreatePushStream();
-
-            // Cria um buffer e lê os dados do Stream
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-            while ((bytesRead = await audioStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+            return result.Reason switch
             {
-                pushStream.Write(buffer, bytesRead);
-            }
-            pushStream.Close();
-
-
-            // Se o áudio for de arquivo, cria uma configuração de áudio a partir do fluxo de entrada de áudio
-            using AudioConfig audioConfig = isFile
-                ? AudioConfig.FromStreamInput(audioStream)
-                : AudioConfig.FromDefaultMicrophoneInput(); // Se for gravação em tempo real
-
-            using TranslationRecognizer translationRecognizer = new(speechTranslationConfig, audioConfig);
-
-            TranslationRecognitionResult translationRecognitionResult = await translationRecognizer.RecognizeOnceAsync();
-
-            return translationRecognitionResult.Reason switch
-            {
-                ResultReason.TranslatedSpeech => translationRecognitionResult.Text,
-                ResultReason.NoMatch => throw new Exception("A fala não pôde ser reconhecida. Verifique o áudio e tente novamente."),
-                ResultReason.Canceled => HandleCancellation(translationRecognitionResult),
-                _ => throw new Exception("Ocorreu um erro desconhecido durante a tradução da fala.")
+                ResultReason.RecognizedSpeech => result.Text,
+                ResultReason.NoMatch => "NOMATCH: Speech could not be recognized.",
+                ResultReason.Canceled => HandleCancellation(result),
+                _ => "Ocorreu um erro desconhecido."
             };
         }
-
-        public string TextoParaFala()
-        {
-            throw new NotImplementedException();
-        }
     }
+}
 }

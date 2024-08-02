@@ -12,12 +12,12 @@ namespace Vocalize_Api.Controllers
 
 
         [HttpPost("FalaParaTexto")]
-        public async Task<IActionResult> FalaParaTexto()
+        public async Task<IActionResult> FalaParaTexto(string audioUri)
         {
             try
             {
 
-                string texto = await _speakServiceRepository.FalaParaTexto();
+                string texto = await _speakServiceRepository.FalaParaTexto(audioUri);
 
                 return StatusCode(201, texto);
 

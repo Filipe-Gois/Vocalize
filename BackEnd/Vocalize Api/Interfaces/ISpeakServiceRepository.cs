@@ -2,7 +2,7 @@
 {
     public interface ISpeakServiceRepository
     {
-        public Task<string> FalaParaTexto(Stream audioStream, bool isFile);
+        public Task<string> FalaParaTexto(string audioUri);
         public string TextoParaFala();
     }
 }
