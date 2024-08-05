@@ -1,15 +1,17 @@
-import { StatusBar, TextInput } from "react-native";
-import { useState } from "react";
-import { SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { Alert, StatusBar, TextInput } from "react-native";
+import { useEffect, useState } from "react";
+import { SafeAreaView, View } from "react-native";
 import api, { speechToText, textToSpeech } from "./src/Utils/service";
 import { useForm } from "react-hook-form";
 import Switch from "./src/Components/Switch/Switch";
 import { Theme } from "./src/Theme/Theme";
-import Button from "./src/Components/Button/Button";
+import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from "expo-av";
+import ButtonBoxComponent from "./src/Components/Button/Button";
 
 export default function App() {
-  const [recording, setRecording] = useState<boolean | null>(null);
-  const [uriRecording, setUriRecording] = useState<string | null>(null);
+  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingFileUri, setRecordingFileUri] = useState<string | null>(null);
   const [isSpeechToText, setIsSpeechToText] = useState(true);
 
   const {
@@ -31,12 +33,77 @@ export default function App() {
   };
 
   const limparCampos = () => {
+    setIsRecording(false);
     setRecording(null);
-    setUriRecording(null);
   };
 
+  const gravarAudio = async () => {
+    const { granted } = await Audio.getPermissionsAsync();
+
+    if (granted) {
+      try {
+        setIsRecording(true);
+        const { recording } = await Audio.Recording.createAsync();
+        setRecording(recording);
+      } catch (error) {
+        console.log(error);
+        Alert.alert(
+          "Erro ao gravar!",
+          `Nao foi possivel iniciar a gravacao do audio.`
+        );
+      }
+    }
+  };
+
+  const pararGravacaoDeAudio = async () => {
+    try {
+      if (recording) {
+        await recording.stopAndUnloadAsync();
+        const fileUri = recording.getURI();
+
+        console.log(fileUri);
+        setRecordingFileUri(fileUri);
+        limparCampos();
+      }
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Erro ao pausar!", "Nao foi possivel pausar a gravacao.");
+    }
+  };
+
+  const gravarOuPararAudio = async () => {
+    if (!isRecording) {
+      gravarAudio();
+    } else {
+      pararGravacaoDeAudio();
+    }
+  };
+
+  const reproduzirAudio = () => {
+    alert("Ouvindo");
+  };
+
+  useEffect(() => {
+    Audio.requestPermissionsAsync().then(({ granted }) => {
+      if (granted) {
+        Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+          playsInSilentModeIOS: true,
+          shouldDuckAndroid: true,
+          interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+          playThroughEarpieceAndroid: true,
+        });
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    console.log(`Está gravando ? R: ${isRecording ? "Sim" : "Não"}`);
+  }, [isRecording]);
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView>
       <View style={{ width: "100%", height: "100%" }}>
         <StatusBar
           backgroundColor={"transparent"}
@@ -74,17 +141,12 @@ export default function App() {
             }}
           />
         </View>
-        <Button isSpeechToText={isSpeechToText} />
+        <ButtonBoxComponent
+          recording={recording}
+          onPress={isSpeechToText ? gravarOuPararAudio : reproduzirAudio}
+          isSpeechToText={isSpeechToText}
+        />
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
