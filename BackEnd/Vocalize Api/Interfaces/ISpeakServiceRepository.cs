@@ -2,7 +2,7 @@
 {
     public interface ISpeakServiceRepository
     {
-        public Task<string> FalaParaTexto(string audioUri);
-        public string TextoParaFala();
+        public Task<string> FalaParaTexto(IFormFile ArquivoDeAudio);
+        public Task<string> TextoParaFala(string texto);
     }
 }

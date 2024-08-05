@@ -12,12 +12,12 @@ namespace Vocalize_Api.Controllers
 
 
         [HttpPost("FalaParaTexto")]
-        public async Task<IActionResult> FalaParaTexto(string audioUri)
+        public async Task<IActionResult> FalaParaTexto([FromForm] IFormFile ArquivoDeAudio)
         {
             try
             {
 
-                string texto = await _speakServiceRepository.FalaParaTexto(audioUri);
+                string texto = await _speakServiceRepository.FalaParaTexto(ArquivoDeAudio);
 
                 return StatusCode(201, texto);
 
@@ -31,13 +31,13 @@ namespace Vocalize_Api.Controllers
 
 
         [HttpPost("TextoParaFala")]
-        public async Task<IActionResult> TextoParaFala()
+        public async Task<IActionResult> TextoParaFala(string texto)
         {
             try
             {
-                string texto = _speakServiceRepository.TextoParaFala();
+                string teste = await _speakServiceRepository.TextoParaFala(texto);
 
-                return StatusCode(201, texto);
+                return StatusCode(201, teste);
             }
             catch (Exception e)
             {

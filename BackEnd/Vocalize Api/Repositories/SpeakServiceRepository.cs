@@ -9,45 +9,30 @@ namespace Vocalize_Api.Repositories
     {
         private readonly string speechKey = Environment.GetEnvironmentVariable("SPEECH_KEY")!;
         private readonly string speechRegion = Environment.GetEnvironmentVariable("SPEECH_REGION")!;
+        private readonly string speechUri = Environment.GetEnvironmentVariable("SPEECH_URI")!;
         private readonly string idioma = "pt-BR";
 
         // Método auxiliar para lidar com detalhes do cancelamento
 
-        public async Task<string> FalaParaTexto(string audioUri)
+        public async Task<string> FalaParaTexto(IFormFile ArquivoDeAudio)
         {
-            if (string.IsNullOrEmpty(audioUri))
-            {
-                throw new Exception("Nenhum arquivo inserido.");
-            }
+
+
 
             try
             {
+                SpeechConfig speechConfig = SpeechConfig.FromEndpoint(new Uri(speechUri), speechKey);
+                speechConfig.SpeechRecognitionLanguage = idioma;
 
-                // Crie um PushAudioInputStream e um AudioConfig a partir dele.
-                var pushStream = new PushAudioInputStream();
-                using (var audioConfig = AudioConfig.FromStreamInput(pushStream))
-                {
-                    // Leia o conteúdo do MemoryStream e escreva no PushAudioInputStream.
-                    await WriteStreamToPushAudioInputStreamAsync(audioStream, pushStream);
+                using AudioConfig audioConfig = AudioConfig.FromDefaultMicrophoneInput();
 
-                    // Configure o SpeechConfig e crie um SpeechRecognizer.
-                    var speechConfig = SpeechConfig.FromSubscription(speechKey, speechRegion);
-                    speechConfig.SpeechRecognitionLanguage = "en-US"; // Defina o idioma de reconhecimento.
+                using SpeechRecognizer recognizer = new(speechConfig, audioConfig);
 
-                    using var recognizer = new SpeechRecognizer(speechConfig, audioConfig);
+                SpeechRecognitionResult result = await recognizer.RecognizeOnceAsync();
 
-                    // Execute o reconhecimento de fala.
-                    var result = await recognizer.RecognizeOnceAsync();
 
-                    // Verifique o resultado do reconhecimento.
-                    return result.Reason switch
-                    {
-                        ResultReason.RecognizedSpeech => result.Text,
-                        ResultReason.NoMatch => "No speech could be recognized.",
-                        ResultReason.Canceled => HandleCancellation(result),
-                        _ => "An unknown error occurred."
-                    };
-                }
+                return result.Text;
+
             }
             catch (Exception)
             {
@@ -56,35 +41,14 @@ namespace Vocalize_Api.Repositories
             }
         }
 
-        public string TextoParaFala()
+        public async Task<string> TextoParaFala(string texto)
         {
             throw new NotImplementedException();
         }
 
-        private string HandleCancellation(SpeechRecognitionResult result)
-        {
-            var cancellation = CancellationDetails.FromResult(result);
-            string errorMessage = $"A tradução foi cancelada. Motivo: {cancellation.Reason}";
-
-            if (cancellation.Reason == CancellationReason.Error)
-            {
-                errorMessage += $" Código de erro: {cancellation.ErrorCode}. Detalhes: {cancellation.ErrorDetails}";
-            }
-
-            return errorMessage;
-        }
 
 
-        private string OutputSpeechRecognitionResult(SpeechRecognitionResult result)
-        {
-            return result.Reason switch
-            {
-                ResultReason.RecognizedSpeech => result.Text,
-                ResultReason.NoMatch => "NOMATCH: Speech could not be recognized.",
-                ResultReason.Canceled => HandleCancellation(result),
-                _ => "Ocorreu um erro desconhecido."
-            };
-        }
+
+
     }
-}
 }
