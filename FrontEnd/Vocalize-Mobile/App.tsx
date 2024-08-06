@@ -2,7 +2,7 @@ import { Alert, StatusBar, TextInput, TouchableOpacity } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import { SafeAreaView, View } from "react-native";
 import api, { speechToText, textToSpeech } from "./src/Utils/service";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import Switch from "./src/Components/Switch/Switch";
 import { Theme } from "./src/Theme/Theme";
 import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from "expo-av";
@@ -14,15 +14,20 @@ export default function App() {
   const [recordingFileUri, setRecordingFileUri] = useState<string | null>(null);
   const [isSpeechToText, setIsSpeechToText] = useState(true);
 
-  const buttonRef = useRef<React.RefObject<TouchableOpacity> | null>(null);
+  // const buttonRef = useRef<React.RefObject<TouchableOpacity> | null>(null);
+
+  type FormValues = {
+    texto: string;
+  };
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+    control,
+  } = useForm<FormValues>();
 
-  const handlePost = async () => {
+  const handlePost = async (data: FormValues) => {
     try {
       const formData = new FormData();
 
@@ -153,7 +158,6 @@ export default function App() {
           />
         </View>
         <ButtonBoxComponent
-          buttonRef={buttonRef}
           isRecording={isRecording}
           recordingFileUri={recordingFileUri}
           onPress={isSpeechToText ? gravarOuPararAudio : reproduzirAudio}

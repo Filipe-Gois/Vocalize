@@ -23,14 +23,13 @@ type ButtonProps = TouchableOpacityProps & {
   isSpeechToText: boolean;
   recordingFileUri: string | null;
   isRecording: boolean;
-  buttonRef: React.RefObject<TouchableOpacity> | null;
+  // buttonRef: React.RefObject<TouchableOpacity> | null;
 };
 //simplificar essa lógica depois :(
 const Button = ({
   isSpeechToText,
   recordingFileUri,
   isRecording,
-  buttonRef,
   ...rest
 }: ButtonProps) => {
   const animation = useSharedValue(1);
@@ -47,7 +46,6 @@ const Button = ({
   if (isSpeechToText) {
     return (
       <TouchableOpacity
-        ref={buttonRef}
         style={{
           width: 100,
           height: 100,
@@ -104,10 +102,9 @@ const ButtonBoxComponent = ({
   isSpeechToText,
   recordingFileUri,
   isRecording,
-  buttonRef,
   ...rest
 }: ButtonProps) => {
-  useEffect(() => {}, []);
+  useEffect(() => {}, [isRecording]);
   return (
     <BackgroundImageButton
       source={
@@ -126,13 +123,14 @@ const ButtonBoxComponent = ({
           }}
         >
           {isSpeechToText
-            ? "Segure para gravar o áudio"
+            ? "Clique para gravar o áudio"
+            : isSpeechToText && isRecording
+            ? "Clique para para a gravação"
             : !isSpeechToText && recordingFileUri
-            ? "Pressione para reproduzir o áudio"
+            ? "Clique para reproduzir o áudio"
             : "Digite algo para gerar o áudio"}
         </Text>
         <Button
-          buttonRef={buttonRef}
           isRecording={isRecording}
           {...rest}
           isSpeechToText={isSpeechToText}
