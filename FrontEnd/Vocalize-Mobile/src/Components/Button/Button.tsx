@@ -8,21 +8,46 @@ import {
 import Feather from "@expo/vector-icons/Feather";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Theme } from "../../Theme/Theme";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { BackgroundImageButton, ButtonBox } from "./style";
 import { Audio } from "expo-av";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 // import BackgroundGreen from "../../Assets/backgroundGreen.png";
 // import BackgroundPink from "../../Assets/backgroundPink.png";
 
 type ButtonProps = TouchableOpacityProps & {
   isSpeechToText: boolean;
-  recording: Audio.Recording | null;
+  recordingFileUri: string | null;
+  isRecording: boolean;
+  buttonRef: React.RefObject<TouchableOpacity> | null;
 };
+//simplificar essa lógica depois :(
+const Button = ({
+  isSpeechToText,
+  recordingFileUri,
+  isRecording,
+  buttonRef,
+  ...rest
+}: ButtonProps) => {
+  const animation = useSharedValue(1);
+  const animationStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          scale: withTiming(animation.value, { duration: 1000 }),
+        },
+      ],
+    };
+  });
 
-const Button = ({ isSpeechToText, recording, ...rest }: ButtonProps) => {
   if (isSpeechToText) {
     return (
       <TouchableOpacity
+        ref={buttonRef}
         style={{
           width: 100,
           height: 100,
@@ -38,14 +63,16 @@ const Button = ({ isSpeechToText, recording, ...rest }: ButtonProps) => {
         }}
         {...rest}
       >
-        {isSpeechToText ? (
-          <Feather name="mic" size={30} color="white" />
-        ) : (
-          <AntDesign name="sound" size={30} color="white" />
-        )}
+        <Animated.View style={[animationStyle]}>
+          {isSpeechToText ? (
+            <Feather name="mic" size={30} color="white" />
+          ) : (
+            <AntDesign name="sound" size={30} color="white" />
+          )}
+        </Animated.View>
       </TouchableOpacity>
     );
-  } else if (!isSpeechToText && recording) {
+  } else if (!isSpeechToText && recordingFileUri) {
     return (
       <TouchableOpacity
         style={{
@@ -75,7 +102,9 @@ const Button = ({ isSpeechToText, recording, ...rest }: ButtonProps) => {
 
 const ButtonBoxComponent = ({
   isSpeechToText,
-  recording,
+  recordingFileUri,
+  isRecording,
+  buttonRef,
   ...rest
 }: ButtonProps) => {
   useEffect(() => {}, []);
@@ -98,12 +127,16 @@ const ButtonBoxComponent = ({
         >
           {isSpeechToText
             ? "Segure para gravar o áudio"
-            : "Pressione para reproduzir o áudio"}
+            : !isSpeechToText && recordingFileUri
+            ? "Pressione para reproduzir o áudio"
+            : "Digite algo para gerar o áudio"}
         </Text>
         <Button
+          buttonRef={buttonRef}
+          isRecording={isRecording}
           {...rest}
           isSpeechToText={isSpeechToText}
-          recording={recording}
+          recordingFileUri={recordingFileUri}
         />
       </View>
     </BackgroundImageButton>

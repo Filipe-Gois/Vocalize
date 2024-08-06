@@ -1,5 +1,5 @@
-import { Alert, StatusBar, TextInput } from "react-native";
-import { useEffect, useState } from "react";
+import { Alert, StatusBar, TextInput, TouchableOpacity } from "react-native";
+import { useEffect, useRef, useState } from "react";
 import { SafeAreaView, View } from "react-native";
 import api, { speechToText, textToSpeech } from "./src/Utils/service";
 import { useForm } from "react-hook-form";
@@ -13,6 +13,8 @@ export default function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingFileUri, setRecordingFileUri] = useState<string | null>(null);
   const [isSpeechToText, setIsSpeechToText] = useState(true);
+
+  const buttonRef = useRef<React.RefObject<TouchableOpacity> | null>(null);
 
   const {
     register,
@@ -42,6 +44,7 @@ export default function App() {
 
     if (granted) {
       try {
+        // buttonRef.current?.current?.props.onPress()
         setIsRecording(true);
         const { recording } = await Audio.Recording.createAsync();
         setRecording(recording);
@@ -71,7 +74,7 @@ export default function App() {
     }
   };
 
-  const gravarOuPararAudio = async () => {
+  const gravarOuPararAudio = () => {
     if (!isRecording) {
       gravarAudio();
     } else {
@@ -79,8 +82,16 @@ export default function App() {
     }
   };
 
-  const reproduzirAudio = () => {
-    alert("Ouvindo");
+  const reproduzirAudio = async () => {
+    if (recordingFileUri) {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: recordingFileUri },
+        { shouldPlay: true }
+      );
+
+      await sound.setPositionAsync(0);
+      await sound.playAsync();
+    }
   };
 
   useEffect(() => {
@@ -142,7 +153,9 @@ export default function App() {
           />
         </View>
         <ButtonBoxComponent
-          recording={recording}
+          buttonRef={buttonRef}
+          isRecording={isRecording}
+          recordingFileUri={recordingFileUri}
           onPress={isSpeechToText ? gravarOuPararAudio : reproduzirAudio}
           isSpeechToText={isSpeechToText}
         />
