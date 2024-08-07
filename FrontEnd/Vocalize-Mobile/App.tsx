@@ -16,8 +16,10 @@ export default function App() {
 
   // const buttonRef = useRef<React.RefObject<TouchableOpacity> | null>(null);
 
+  //referencia o nome de cada elemento
   type FormValues = {
-    texto: string;
+    Texto: string;
+    //password:string;
   };
 
   const {
@@ -25,6 +27,7 @@ export default function App() {
     handleSubmit,
     formState: { errors },
     control,
+    watch,
   } = useForm<FormValues>();
 
   const handlePost = async (data: FormValues) => {
@@ -114,9 +117,10 @@ export default function App() {
     });
   }, []);
 
+  const textoValue = watch("Texto");
   useEffect(() => {
-    console.log(`Está gravando ? R: ${isRecording ? "Sim" : "Não"}`);
-  }, [isRecording]);
+    console.log(textoValue);
+  }, []);
 
   return (
     <SafeAreaView>
@@ -132,7 +136,43 @@ export default function App() {
             isSpeechToText={isSpeechToText}
           />
 
-          <TextInput
+          <Controller
+            control={control}
+            name="Texto"
+            defaultValue=""
+            rules={{ required: "Name is required" }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                onEndEditing={handleSubmit(handlePost)}
+                textAlignVertical="center"
+                multiline
+                editable={!isSpeechToText}
+                placeholderTextColor={
+                  isSpeechToText ? Theme.colors.pink.v1 : Theme.colors.green.v1
+                }
+                placeholder={
+                  isSpeechToText
+                    ? "Áudio Convertido:"
+                    : "Insira seu Texto aqui:"
+                }
+                style={{
+                  width: "90%",
+                  borderWidth: 2,
+                  borderRadius: 25,
+                  borderColor: isSpeechToText
+                    ? Theme.colors.pink.v1
+                    : Theme.colors.green.v1,
+                  height: 150,
+                  padding: 15,
+                  color: isSpeechToText
+                    ? Theme.colors.pink.v1
+                    : Theme.colors.green.v1,
+                }}
+              />
+            )}
+          />
+
+          {/* <TextInput
             textAlignVertical="center"
             multiline
             editable={!isSpeechToText}
@@ -155,7 +195,7 @@ export default function App() {
                 ? Theme.colors.pink.v1
                 : Theme.colors.green.v1,
             }}
-          />
+          /> */}
         </View>
         <ButtonBoxComponent
           isRecording={isRecording}
