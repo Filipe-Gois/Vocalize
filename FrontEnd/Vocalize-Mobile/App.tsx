@@ -1,45 +1,56 @@
-import { Alert, StatusBar, TextInput, TouchableOpacity } from "react-native";
-import { useEffect, useRef, useState } from "react";
+import {
+  Alert,
+  StatusBar,
+  TextInput,
+  Keyboard,
+  StyleSheet,
+} from "react-native";
+import { useEffect, useState } from "react";
 import { SafeAreaView, View } from "react-native";
 import api, { speechToText, textToSpeech } from "./src/Utils/service";
 import { useForm, Controller } from "react-hook-form";
 import Switch from "./src/Components/Switch/Switch";
 import { Theme } from "./src/Theme/Theme";
 import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from "expo-av";
-import ButtonBoxComponent from "./src/Components/Button/Button";
+import ButtonBoxComponent from "./src/Components/Button/ButtonBox";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { FormValues } from "./src/Types/Types";
 
-export default function App() {
+//validações de inputs
+const inputSchema = yup.object({
+  Texto: yup
+    .string()
+    .required("Informe o texto!")
+    .min(5, "O texto deve ter no mínimo 5 caracteres!"),
+});
+
+const App = () => {
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingFileUri, setRecordingFileUri] = useState<string | null>(null);
   const [isSpeechToText, setIsSpeechToText] = useState(true);
 
-  // const buttonRef = useRef<React.RefObject<TouchableOpacity> | null>(null);
-
-  //referencia o nome de cada elemento
-  type FormValues = {
-    Texto: string;
-    //password:string;
-  };
-
+  //<FormValues>: referencia o nome de cada elemento
   const {
-    register,
     handleSubmit,
     formState: { errors },
     control,
-    watch,
-  } = useForm<FormValues>();
+  } = useForm<FormValues>({
+    resolver: yupResolver(inputSchema),
+  });
 
   const handlePost = async (data: FormValues) => {
-    try {
-      const formData = new FormData();
+    // try {
+    //   const formData = new FormData();
 
-      if (isSpeechToText) {
-        await api.post(`${speechToText}`);
-      } else {
-        await api.post(`${textToSpeech}`);
-      }
-    } catch (error) {}
+    //   if (isSpeechToText) {
+    //     await api.post(`${speechToText}`);
+    //   } else {
+    //     await api.post(`${textToSpeech}`);
+    //   }
+    // } catch (error) {}
+    console.log(data);
   };
 
   const limparCampos = () => {
@@ -117,20 +128,29 @@ export default function App() {
     });
   }, []);
 
-  const textoValue = watch("Texto");
   useEffect(() => {
-    console.log(textoValue);
+    // valida se o usuario minimizar o teclado, disparando o post da api
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        handleSubmit(handlePost)();
+        console.log("minimizou");
+      }
+    );
+    return () => {
+      keyboardDidHideListener.remove();
+    };
   }, []);
 
   return (
-    <SafeAreaView>
-      <View style={{ width: "100%", height: "100%" }}>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
         <StatusBar
-          backgroundColor={"transparent"}
+          backgroundColor="transparent"
           barStyle="dark-content"
           translucent
         />
-        <View style={{ alignItems: "center" }}>
+        <View style={styles.innerContainer}>
           <Switch
             setIsSpeechToText={setIsSpeechToText}
             isSpeechToText={isSpeechToText}
@@ -139,11 +159,9 @@ export default function App() {
           <Controller
             control={control}
             name="Texto"
-            defaultValue=""
-            rules={{ required: "Name is required" }}
-            render={({ field: { onChange, onBlur, value } }) => (
+            render={({ field: { onChange } }) => (
               <TextInput
-                onEndEditing={handleSubmit(handlePost)}
+                onChangeText={onChange}
                 textAlignVertical="center"
                 multiline
                 editable={!isSpeechToText}
@@ -155,47 +173,20 @@ export default function App() {
                     ? "Áudio Convertido:"
                     : "Insira seu Texto aqui:"
                 }
-                style={{
-                  width: "90%",
-                  borderWidth: 2,
-                  borderRadius: 25,
-                  borderColor: isSpeechToText
-                    ? Theme.colors.pink.v1
-                    : Theme.colors.green.v1,
-                  height: 150,
-                  padding: 15,
-                  color: isSpeechToText
-                    ? Theme.colors.pink.v1
-                    : Theme.colors.green.v1,
-                }}
+                style={[
+                  styles.textInput,
+                  {
+                    borderColor: isSpeechToText
+                      ? Theme.colors.pink.v1
+                      : Theme.colors.green.v1,
+                    color: isSpeechToText
+                      ? Theme.colors.pink.v1
+                      : Theme.colors.green.v1,
+                  },
+                ]}
               />
             )}
           />
-
-          {/* <TextInput
-            textAlignVertical="center"
-            multiline
-            editable={!isSpeechToText}
-            placeholderTextColor={
-              isSpeechToText ? Theme.colors.pink.v1 : Theme.colors.green.v1
-            }
-            placeholder={
-              isSpeechToText ? "Áudio Convertido:" : "Insira seu Texto aqui:"
-            }
-            style={{
-              width: "90%",
-              borderWidth: 2,
-              borderRadius: 25,
-              borderColor: isSpeechToText
-                ? Theme.colors.pink.v1
-                : Theme.colors.green.v1,
-              height: 150,
-              padding: 15,
-              color: isSpeechToText
-                ? Theme.colors.pink.v1
-                : Theme.colors.green.v1,
-            }}
-          /> */}
         </View>
         <ButtonBoxComponent
           isRecording={isRecording}
@@ -206,4 +197,26 @@ export default function App() {
       </View>
     </SafeAreaView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  container: {
+    width: "100%",
+    height: "100%",
+  },
+  innerContainer: {
+    alignItems: "center",
+  },
+  textInput: {
+    width: "90%",
+    borderWidth: 2,
+    borderRadius: 25,
+    height: 150,
+    padding: 15,
+  },
+});
+
+export default App;
