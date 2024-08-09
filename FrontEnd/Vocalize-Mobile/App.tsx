@@ -23,8 +23,9 @@ import {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
+// import { useAudioData } from "./src/Hooks/useTranslateDate";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useAudioData } from "./src/Hooks/useTranslateDate";
+import { useAudioMutate } from "./src/Hooks/useAudioMute";
 
 //validações de inputs
 const inputSchema = yup.object({
@@ -35,11 +36,12 @@ const inputSchema = yup.object({
 });
 
 const App = () => {
-  const { data } = useAudioData();
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingFileUri, setRecordingFileUri] = useState<string | null>(null);
   const [isSpeechToText, setIsSpeechToText] = useState(true);
+
+  const { mutate: mutateAudioToText } = useAudioMutate();
 
   //<FormValues>: referencia o nome de cada elemento
   const {
@@ -50,17 +52,12 @@ const App = () => {
     resolver: yupResolver(inputSchema),
   });
 
-  const handlePost = async (data: FormValues) => {
-    // try {
-    //   const formData = new FormData();
+  const handlePost = async () => {
+    const formData = new FormData();
 
-    //   if (isSpeechToText) {
-    //     await api.post(${speechToText});
-    //   } else {
-    //     await api.post(${textToSpeech});
-    //   }
-    // } catch (error) {}
-    console.log(data);
+    if (isSpeechToText) {
+    } else {
+    }
   };
 
   const limparCampos = () => {
@@ -143,7 +140,7 @@ const App = () => {
     const keyboardDidHideListener = Keyboard.addListener(
       "keyboardDidHide",
       () => {
-        handleSubmit(handlePost)();
+        // handleSubmit(handlePost)();
         console.log("minimizou");
       }
     );
