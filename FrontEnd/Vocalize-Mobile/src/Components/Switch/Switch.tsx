@@ -11,10 +11,15 @@ import { Theme } from "../../Theme/Theme";
 
 type SwitchProps = {
   isSpeechToText: boolean;
+  isRecording: boolean;
   setIsSpeechToText: (value: boolean) => void;
 };
 
-const Switch = ({ isSpeechToText = true, setIsSpeechToText }: SwitchProps) => {
+const Switch = ({
+  isSpeechToText = true,
+  setIsSpeechToText,
+  isRecording,
+}: SwitchProps) => {
   const heightStatusBar = StatusBar.currentHeight;
   const animation = useSharedValue(0);
   const animatedStyle = useAnimatedStyle(() => {
@@ -35,13 +40,14 @@ const Switch = ({ isSpeechToText = true, setIsSpeechToText }: SwitchProps) => {
     >
       <TouchableOpacity
         onPress={() => {
-          if (animation.value === 0) {
-            animation.value = withTiming(96, { duration: 500 });
-            setIsSpeechToText(false);
-          } else {
-            animation.value = withTiming(0, { duration: 500 });
-            setIsSpeechToText(true);
-          }
+          if (!isRecording)
+            if (animation.value === 0) {
+              animation.value = withTiming(96, { duration: 500 });
+              setIsSpeechToText(false);
+            } else {
+              animation.value = withTiming(0, { duration: 500 });
+              setIsSpeechToText(true);
+            }
         }}
         style={[
           styles.touchable,

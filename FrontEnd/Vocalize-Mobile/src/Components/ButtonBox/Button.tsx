@@ -13,20 +13,9 @@ const Button = ({
   isSpeechToText,
   recordingFileUri,
   isRecording,
+  style: styleAnimatedView,
   ...rest
 }: ButtonProps) => {
-  const animation = useSharedValue(1);
-
-  const animationStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          scale: withTiming(animation.value, { duration: 1000 }),
-        },
-      ],
-    };
-  });
-
   const backgroundColor = isSpeechToText
     ? Theme.colors.pink.v1
     : Theme.colors.green.v1;
@@ -39,9 +28,15 @@ const Button = ({
 
   if (isSpeechToText || recordingFileUri) {
     return (
-      <TouchableOpacity style={[styles.button, { backgroundColor }]} {...rest}>
-        <Animated.View style={animationStyle}>{icon}</Animated.View>
-      </TouchableOpacity>
+      <Animated.View style={styleAnimatedView}>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor }]}
+          {...rest}
+        >
+          {icon}
+          {/* <Animated.View style={styleAnimatedView}>{icon}</Animated.View> */}
+        </TouchableOpacity>
+      </Animated.View>
     );
   }
 };

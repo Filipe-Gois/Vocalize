@@ -10,8 +10,9 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
+    "@tanstack/react-query": "^5.51.23",
     "axios": "^1.7.3",
-    "expo": "^51.0.24",
+    "expo": "^51.0.26",
     "expo-av": "^14.0.6",
     "expo-status-bar": "~1.12.1",
     "install": "^0.13.0",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
+    "@tanstack/eslint-plugin-query": "^5.51.15",
     "@types/react": "~18.2.45",
     "typescript": "^5.1.3"
   },

@@ -1,12 +1,5 @@
-import {
-  ImageBackground,
-  StyleSheet,
-  Text,
-  TouchableOpacityProps,
-  View,
-} from "react-native";
+import { ImageBackground, StyleSheet, Text, View } from "react-native";
 import { Theme } from "../../Theme/Theme";
-import { useEffect } from "react";
 import Button from "../ButtonBox/Button";
 import { ButtonProps } from "../../Types/Types";
 
@@ -14,9 +7,9 @@ const ButtonBoxComponent = ({
   isSpeechToText,
   recordingFileUri,
   isRecording,
+  style: styleAnimatedView,
   ...rest
 }: ButtonProps) => {
-  useEffect(() => {}, [isRecording]);
   return (
     <ImageBackground
       style={styles.backgroundImage}
@@ -46,6 +39,7 @@ const ButtonBoxComponent = ({
             : "Digite algo para gerar o áudio"}
         </Text>
         <Button
+          style={styleAnimatedView}
           isRecording={isRecording}
           {...rest}
           isSpeechToText={isSpeechToText}
