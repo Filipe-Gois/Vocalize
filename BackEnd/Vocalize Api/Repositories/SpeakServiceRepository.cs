@@ -21,7 +21,7 @@ namespace Vocalize_Api.Repositories
 
             try
             {
-                SpeechConfig speechConfig = SpeechConfig.FromEndpoint(new Uri(speechUri), speechKey);
+                SpeechConfig speechConfig = SpeechConfig.FromSubscription(speechKey, speechRegion);
                 speechConfig.SpeechRecognitionLanguage = idioma;
 
                 using AudioConfig audioConfig = AudioConfig.FromDefaultMicrophoneInput();
@@ -41,14 +41,27 @@ namespace Vocalize_Api.Repositories
             }
         }
 
-        public async Task<string> TextoParaFala(string texto)
+        public async Task<byte[]> TextoParaFala(string texto)
         {
-            throw new NotImplementedException();
+            SpeechConfig config = SpeechConfig.FromSubscription(speechKey, speechRegion);
+
+            config.SpeechRecognitionLanguage = idioma;
+
+            using SpeechSynthesizer synthesizer = new(config);
+
+            SpeechSynthesisResult resultado = await synthesizer.SpeakTextAsync(texto);
+
+            // Verifica se a síntese foi bem-sucedida
+            if (resultado.Reason == ResultReason.SynthesizingAudioCompleted)
+            {
+                // Retorna o áudio gerado como um byte[]
+                return resultado.AudioData;
+            }
+            else
+            {
+                // Lida com o erro de síntese
+                throw new Exception($"Erro na síntese de fala: {resultado.Reason}");
+            }
         }
-
-
-
-
-
     }
 }

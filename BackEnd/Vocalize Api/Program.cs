@@ -30,8 +30,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// Registrando o servi�o de e-mail como uma inst�ncia transit�ria, que � criada cada vez que � solicitada
-builder.Services.AddTransient<ISpeakServiceRepository, SpeakServiceRepository>();
+builder.Services.AddScoped<ISpeakServiceRepository, SpeakServiceRepository>();
 
 // CORS
 builder.Services.AddCors(options =>
@@ -64,6 +63,8 @@ app.UseSwaggerUI(options =>
 app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

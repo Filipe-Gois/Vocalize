@@ -6,8 +6,8 @@ namespace Vocalize_Api.Utils
     {
         public static IFormFile ConvertToWav(IFormFile file)
         {
+            return file;
 
-           
         }
     }
 }
