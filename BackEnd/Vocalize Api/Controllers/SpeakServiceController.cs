@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CognitiveServices.Speech;
+using Vocalize_Api.Domains;
 using Vocalize_Api.Interfaces;
 
 namespace Vocalize_Api.Controllers
@@ -13,12 +14,12 @@ namespace Vocalize_Api.Controllers
 
 
         [HttpPost("FalaParaTexto")]
-        public async Task<IActionResult> FalaParaTexto(IFormFile ArquivoDeAudio)
+        public async Task<IActionResult> FalaParaTexto([FromForm] AudioInput file)
         {
             try
             {
 
-                string texto = await _speakServiceRepository.FalaParaTexto(ArquivoDeAudio);
+                string texto = await _speakServiceRepository.FalaParaTexto(file);
 
                 return StatusCode(201, texto);
 
@@ -29,7 +30,6 @@ namespace Vocalize_Api.Controllers
                 return BadRequest(e.Message);
             }
         }
-
 
         [HttpPost("TextoParaFala")]
         public async Task<IActionResult> TextoParaFala(string texto)
