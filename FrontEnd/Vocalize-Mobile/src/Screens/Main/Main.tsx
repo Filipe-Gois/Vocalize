@@ -26,10 +26,8 @@ import { useTextMutate } from "../../Hooks/useTextMutate";
 
 //validações de inputs
 const inputSchema = yup.object({
-  Texto: yup
-    .string()
-    .required("Informe o texto!")
-    .min(5, "O texto deve ter no mínimo 5 caracteres!"),
+  Texto: yup.string().required("Informe o texto!"),
+  // .min(5, "O texto deve ter no mínimo 5 caracteres!"),
 });
 
 const Main = () => {
@@ -43,12 +41,14 @@ const Main = () => {
     data: audioData,
     isError: isErrorAudio,
   } = useAudioMutate();
+
   const {
     mutate: textMutate,
     data: textData,
     isError: isErrorText,
+    isSuccess: isSuccessText,
+    status: textStatus,
   } = useTextMutate();
-
   //<FormValues>: referencia o nome de cada elemento
   const {
     handleSubmit,
@@ -63,11 +63,9 @@ const Main = () => {
     const data = audio;
     audioMutate(audio);
   };
-  const handlePostText = (texto: FormValues) => {
-    const data = texto.Texto;
-    textMutate(data);
-
-    console.log(data);
+  const handlePostText = ({ Texto }: FormValues) => {
+    console.log("Texto", Texto);
+    textMutate(Texto);
   };
 
   const limparCampos = () => {
@@ -188,6 +186,18 @@ const Main = () => {
       ],
     };
   });
+
+  useEffect(() => {
+    if (isSuccessText) {
+      console.log("Texto enviado com sucesso:", textData);
+      // Faça algo com a resposta, como atualizar o estado ou exibir uma mensagem
+    }
+
+    if (isErrorText) {
+      console.error("Erro ao enviar texto:");
+      // Mostre uma mensagem de erro ou execute outra ação apropriada
+    }
+  }, [isSuccessText, isErrorText, textData]);
 
   return (
     <SafeAreaView style={styles.safeArea}>

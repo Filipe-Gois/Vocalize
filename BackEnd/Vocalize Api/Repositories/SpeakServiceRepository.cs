@@ -17,70 +17,9 @@ namespace Vocalize_Api.Repositories
 
         // Método auxiliar para lidar com detalhes do cancelamento
 
-        //public async Task<string> FalaParaTexto(AudioInput file)
-        //{
-
-        //    try
-        //    {
-        //        if (file.File == null || file.File.Length == 0)
-        //        {
-        //            throw new Exception("Informe um arquivo de áudio!");
-        //        }
-
-        //        PushAudioInputStream pushStream = new();
-
-        //        //Copia os dados do arquivo para o PushAudioInputStream
-        //        using (MemoryStream memoryStream = new())
-        //        {
-        //            await file.File.CopyToAsync(memoryStream);
-        //            memoryStream.Position = 0; // Redefine a posição para o início
-
-        //            // Escreva os bytes no PushAudioInputStream
-
-        //            using BinaryReader audioStream = new(memoryStream);
-        //            byte[] buffer = new byte[16384];
-        //            int bytesRead = 0;
-        //            while ((bytesRead = audioStream.Read(buffer, 0, buffer.Length)) > 0)
-        //            {
-        //                pushStream.Write(buffer, bytesRead);
-        //            }
-
-        //        }
-
-        //        pushStream.Close();
-
-        //        SpeechConfig speechConfig = SpeechConfig.FromSubscription(speechKey, speechRegion);
-        //        speechConfig.SpeechRecognitionLanguage = idioma;
-
-
-        //        //AudioConfig audioConfig = AudioConfig.FromWavFileInput("teste1.wav");
-        //        AudioConfig audioConfig = AudioConfig.FromStreamInput(pushStream);
-        //        using SpeechRecognizer speechRecognizer = new(speechConfig, idioma, audioConfig);
-
-        //        SpeechRecognitionResult result = await speechRecognizer.RecognizeOnceAsync();
-
-
-
-        //        string resultadoValidado = GlobalFunctions.ValidarRespostaDoAudio(result);
-
-        //        // Adicione logs para verificar o resultado
-        //        Debug.WriteLine($"Resultado da fala: {audioConfig}");
-
-
-        //        return resultadoValidado;
-        //    }
-        //    catch (Exception)
-        //    {
-
-        //        throw;
-        //    }
-
-
-        //}
-
-
         public async Task<string> FalaParaTexto(AudioInput file)
         {
+
             try
             {
                 if (file.File == null || file.File.Length == 0)
@@ -88,34 +27,95 @@ namespace Vocalize_Api.Repositories
                     throw new Exception("Informe um arquivo de áudio!");
                 }
 
+                PushAudioInputStream pushStream = new();
+
+                //Copia os dados do arquivo para o PushAudioInputStream
+                using (MemoryStream memoryStream = new())
+                {
+                    await file.File.CopyToAsync(memoryStream);
+                    memoryStream.Position = 0; // Redefine a posição para o início
+
+                    // Escreva os bytes no PushAudioInputStream
+
+                    using BinaryReader audioStream = new(memoryStream);
+                    byte[] buffer = new byte[16384];
+                    int bytesRead = 0;
+                    while ((bytesRead = audioStream.Read(buffer, 0, buffer.Length)) > 0)
+                    {
+                        pushStream.Write(buffer, bytesRead);
+                    }
+
+                }
+
+                pushStream.Close();
+
                 SpeechConfig speechConfig = SpeechConfig.FromSubscription(speechKey, speechRegion);
                 speechConfig.SpeechRecognitionLanguage = idioma;
 
-                using var reader = new BinaryReader(file.File.OpenReadStream());
-                using var audioConfigStream = AudioInputStream.CreatePushStream();
-                using var audioConfig = AudioConfig.FromStreamInput(audioConfigStream);
-                using var speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig);
 
-                byte[] readBytes;
-                do
-                {
-                    readBytes = reader.ReadBytes(16384);
-                    audioConfigStream.Write(readBytes, readBytes.Length);
-                } while (readBytes.Length > 0);
+                //AudioConfig audioConfig = AudioConfig.FromWavFileInput("teste1.wav");
+                AudioConfig audioConfig = AudioConfig.FromStreamInput(pushStream);
+                using SpeechRecognizer speechRecognizer = new(speechConfig, idioma, audioConfig);
 
-                var result = await speechRecognizer.RecognizeOnceAsync();
-                Debug.WriteLine($"RECOGNIZED: Text={result.Text}");
+                SpeechRecognitionResult result = await speechRecognizer.RecognizeOnceAsync();
+
+
 
                 string resultadoValidado = GlobalFunctions.ValidarRespostaDoAudio(result);
 
+                // Adicione logs para verificar o resultado
+                Debug.WriteLine($"Resultado da fala: {audioConfig}");
+
+
                 return resultadoValidado;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Debug.WriteLine($"Erro ao processar o arquivo de áudio: {ex.Message}");
+
                 throw;
             }
+
+
         }
+
+
+        //public async Task<string> FalaParaTexto(AudioInput file)
+        //{
+        //    try
+        //    {
+        //        if (file.File == null || file.File.Length == 0)
+        //        {
+        //            throw new Exception("Informe um arquivo de áudio!");
+        //        }
+
+        //        SpeechConfig speechConfig = SpeechConfig.FromSubscription(speechKey, speechRegion);
+        //        speechConfig.SpeechRecognitionLanguage = idioma;
+
+        //        using var reader = new BinaryReader(file.File.OpenReadStream());
+        //        using var audioConfigStream = AudioInputStream.CreatePushStream();
+        //        using var audioConfig = AudioConfig.FromStreamInput(audioConfigStream);
+        //        using var speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig);
+
+        //        byte[] readBytes;
+        //        do
+        //        {
+        //            readBytes = reader.ReadBytes(16384);
+        //            audioConfigStream.Write(readBytes, readBytes.Length);
+        //        } while (readBytes.Length > 0);
+
+        //        var result = await speechRecognizer.RecognizeOnceAsync();
+        //        Debug.WriteLine($"RECOGNIZED: Text={result.Text}");
+
+        //        string resultadoValidado = GlobalFunctions.ValidarRespostaDoAudio(result);
+
+        //        return resultadoValidado;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Debug.WriteLine($"Erro ao processar o arquivo de áudio: {ex.Message}");
+        //        throw;
+        //    }
+        //}
 
 
         public async Task<byte[]> TextoParaFala(string texto)
