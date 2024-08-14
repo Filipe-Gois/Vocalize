@@ -2,9 +2,9 @@ import axios from "axios";
 
 const ip = `192.168.15.61`;
 const ipSenai = `172.16.39.113`;
-const apiPort = `7105`;
+const apiPort = `5193`;
 
-const urlApi = `https://${ipSenai}:${apiPort}/api/SpeakService`;
+const urlApi = `http://${ip}:${apiPort}/api/SpeakService`;
 
 const api = axios.create({ baseURL: urlApi });
 

@@ -14,6 +14,7 @@ const Button = ({
   recordingFileUri,
   isRecording,
   style: styleAnimatedView,
+  textData,
   ...rest
 }: ButtonProps) => {
   const backgroundColor = isSpeechToText
@@ -26,7 +27,7 @@ const Button = ({
     <AntDesign name="sound" size={30} color="white" />
   );
 
-  if (isSpeechToText || recordingFileUri) {
+  if (isSpeechToText || textData?.status === 201) {
     return (
       <Animated.View style={styleAnimatedView}>
         <TouchableOpacity

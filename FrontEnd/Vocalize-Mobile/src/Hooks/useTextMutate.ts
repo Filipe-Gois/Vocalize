@@ -1,14 +1,13 @@
-import axios, { AxiosPromise } from "axios";
+import { AxiosPromise } from "axios";
 import api, { textToSpeech } from "../Utils/service";
 import { useMutation } from "@tanstack/react-query";
 import { AudioResponse } from "../Types/Types";
 
 const handlePost = async (texto: string): AxiosPromise<AudioResponse> => {
-  const response = await axios.post<AudioResponse>(
+  const response = await api.post<AudioResponse>(
     `${textToSpeech}?texto=${texto}`
   );
 
-  console.log("response.status", response.status);
   return response;
 };
 

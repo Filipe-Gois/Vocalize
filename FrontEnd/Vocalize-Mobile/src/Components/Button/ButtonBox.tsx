@@ -8,6 +8,7 @@ const ButtonBoxComponent = ({
   recordingFileUri,
   isRecording,
   style: styleAnimatedView,
+  textData,
   ...rest
 }: ButtonProps) => {
   return (
@@ -39,6 +40,7 @@ const ButtonBoxComponent = ({
             : "Digite algo para gerar o áudio"}
         </Text>
         <Button
+          textData={textData}
           style={styleAnimatedView}
           isRecording={isRecording}
           {...rest}

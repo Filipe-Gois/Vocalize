@@ -64,7 +64,6 @@ const Main = () => {
     audioMutate(audio);
   };
   const handlePostText = ({ Texto }: FormValues) => {
-    console.log("Texto", Texto);
     textMutate(Texto);
   };
 
@@ -83,7 +82,6 @@ const Main = () => {
         const { recording } = await Audio.Recording.createAsync();
         setRecording(recording);
       } catch (error) {
-        console.log(error);
         Alert.alert(
           "Erro ao gravar!",
           "Nao foi possivel iniciar a gravacao do audio."
@@ -107,7 +105,6 @@ const Main = () => {
         // handlePostAudio(audio);
       }
     } catch (error) {
-      console.log(error);
       Alert.alert("Erro ao pausar!", "Nao foi possivel pausar a gravacao.");
     }
   };
@@ -153,7 +150,6 @@ const Main = () => {
       "keyboardDidHide",
       () => {
         handleSubmit(handlePostText)();
-        console.log("minimizou");
       }
     );
     return () => {
@@ -168,6 +164,17 @@ const Main = () => {
       animation.value = 1;
     }
   }, [isRecording]);
+
+  useEffect(() => {
+    if (isSuccessText) {
+      // Faça algo com a resposta, como atualizar o estado ou exibir uma mensagem
+    }
+
+    if (isErrorText) {
+      console.error("Erro ao enviar texto:");
+      // Mostre uma mensagem de erro ou execute outra ação apropriada
+    }
+  }, [isSuccessText, isErrorText, textData]);
 
   const animation = useSharedValue(1);
 
@@ -188,16 +195,8 @@ const Main = () => {
   });
 
   useEffect(() => {
-    if (isSuccessText) {
-      console.log("Texto enviado com sucesso:", textData);
-      // Faça algo com a resposta, como atualizar o estado ou exibir uma mensagem
-    }
-
-    if (isErrorText) {
-      console.error("Erro ao enviar texto:");
-      // Mostre uma mensagem de erro ou execute outra ação apropriada
-    }
-  }, [isSuccessText, isErrorText, textData]);
+    console.log("textData:", textData?.data.contentType);
+  }, [textData]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -247,6 +246,7 @@ const Main = () => {
           />
         </View>
         <ButtonBoxComponent
+          textData={textData}
           style={isRecording && animationButtonScale}
           isRecording={isRecording}
           recordingFileUri={recordingFileUri}
