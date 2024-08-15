@@ -13,12 +13,7 @@ type FormValues = {
 };
 
 type AudioResponse = {
-  fileContents: string;
-  contentType: "audio/wav";
-  fileDownloadName: "";
-  lastModified: null;
-  entityTag: null;
-  enableRangeProcessing: false;
+  bytesAudio: Uint8Array;
 };
 
 type TextResponse = {};

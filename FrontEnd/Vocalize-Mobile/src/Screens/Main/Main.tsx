@@ -117,15 +117,35 @@ const Main = () => {
     }
   };
 
-  const reproduzirAudio = async () => {
-    if (recordingFileUri) {
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: recordingFileUri },
-        { shouldPlay: true }
-      );
+  // Função para criar um blob a partir de bytes
+  const createBlobFromBytes = (bytes: Uint8Array) => {
+    if (bytes) {
+      return new Blob([bytes], { type: "audio/wav" }); // ajuste o tipo MIME conforme necessário
+    }
+  };
 
-      await sound.setPositionAsync(0);
-      await sound.playAsync();
+  const reproduzirAudio = async () => {
+    console.log("textData?.data.bytesAudio", textData?.data.bytesAudio);
+    if (textData?.data.bytesAudio) {
+      try {
+        const blob = createBlobFromBytes(textData?.data.bytesAudio);
+
+        console.log(blob);
+
+        const url = blob ? URL.createObjectURL(blob) : null;
+
+        if (url) {
+          const { sound } = await Audio.Sound.createAsync(
+            { uri: url },
+            { shouldPlay: true }
+          );
+
+          await sound.setPositionAsync(0);
+          await sound.playAsync();
+        }
+      } catch (error) {
+        console.error("Erro ao reproduzir áudio:", error);
+      }
     }
   };
 
@@ -195,7 +215,7 @@ const Main = () => {
   });
 
   useEffect(() => {
-    console.log("textData:", textData?.data.contentType);
+    console.log("textData:", textData?.data.bytesAudio);
   }, [textData]);
 
   return (

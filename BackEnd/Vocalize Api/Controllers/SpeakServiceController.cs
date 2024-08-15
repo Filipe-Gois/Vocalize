@@ -36,9 +36,9 @@ namespace Vocalize_Api.Controllers
         {
             try
             {
-                byte[] audio = await _speakServiceRepository.TextoParaFala(texto);
+                byte[] bytesAudio = await _speakServiceRepository.TextoParaFala(texto);
 
-                return StatusCode(201, File(audio, "audio/wav"));
+                return StatusCode(201, new { bytesAudio });
             }
             catch (Exception e)
             {
