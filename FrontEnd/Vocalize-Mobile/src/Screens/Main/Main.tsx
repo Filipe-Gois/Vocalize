@@ -12,9 +12,6 @@ import Switch from "../../Components/Switch/Switch";
 import { Theme } from "../../Theme/Theme";
 import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from "expo-av";
 import ButtonBoxComponent from "../../Components/Button/ButtonBox";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { FormValues } from "../../Types/Types";
 import {
   useAnimatedStyle,
   useSharedValue,
@@ -23,11 +20,14 @@ import {
 } from "react-native-reanimated";
 import { useAudioMutate } from "../../Hooks/useAudioMute";
 import { useTextMutate } from "../../Hooks/useTextMutate";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-//validações de inputs
-const inputSchema = yup.object({
-  Texto: yup.string().required("Informe o texto!"),
-  // .min(5, "O texto deve ter no mínimo 5 caracteres!"),
+type FormValues = z.infer<typeof inputSchema>;
+
+//validações de inputs. Apenas definir o tipo já indica que o campo é obrigatório.
+const inputSchema = z.object({
+  Texto: z.string().min(1), //indica que deve ter no minimo 1 caracter
 });
 
 const Main = () => {
@@ -55,7 +55,7 @@ const Main = () => {
     formState: { errors },
     control,
   } = useForm<FormValues>({
-    resolver: yupResolver(inputSchema),
+    resolver: zodResolver(inputSchema),
   });
 
   const handlePostAudio = (audio: File) => {
