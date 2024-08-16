@@ -21,7 +21,7 @@ namespace Vocalize_Api.Controllers
 
                 string texto = await _speakServiceRepository.FalaParaTexto(file);
 
-                return StatusCode(201, texto);
+                return StatusCode(201, new { texto });
 
             }
             catch (Exception e)
@@ -39,6 +39,22 @@ namespace Vocalize_Api.Controllers
                 byte[] bytesAudio = await _speakServiceRepository.TextoParaFala(texto);
 
                 return StatusCode(201, new { bytesAudio });
+            }
+            catch (Exception e)
+            {
+
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Teste()
+        {
+            try
+            {
+                
+
+                return StatusCode(200, new {texto = "teste do fefe"});
             }
             catch (Exception e)
             {

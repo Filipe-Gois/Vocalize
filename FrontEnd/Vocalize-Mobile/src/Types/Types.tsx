@@ -8,10 +8,18 @@ type ButtonProps = TouchableOpacityProps & {
   textData?: AxiosResponse<AudioResponse>;
 };
 
+type AudioData = {
+  uri: string;
+  name: string;
+  type: string;
+};
+
 type AudioResponse = {
   bytesAudio: Uint8Array;
 };
 
-type TextResponse = {};
+type TextResponse = {
+  texto: string;
+};
 
-export { ButtonProps, AudioResponse, TextResponse };
+export { ButtonProps, AudioData, AudioResponse, TextResponse };

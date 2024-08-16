@@ -1,13 +1,34 @@
 //fala para texto
 import { useMutation } from "@tanstack/react-query";
-import { FormValues, TextResponse } from "../Types/Types";
+import { TextResponse } from "../Types/Types";
 import api, { speechToText } from "../Utils/service";
-import { AxiosPromise } from "axios";
+import axios, { AxiosPromise } from "axios";
 
-const handlePost = async (audio: File): AxiosPromise<TextResponse> => {
-  const response = await api.post<TextResponse>(speechToText, audio);
+//: AxiosPromise<TextResponse>
+const handlePost = async (audioFormData: FormData) => {
+  console.log("teste");
+  try {
+    const response = await api.postForm<TextResponse>(
+      speechToText,
+      audioFormData
+    );
 
-  return response;
+    console.log(response.status);
+    return response;
+
+    // const response = await axios.get(
+    //   "http://192.168.15.61:5193/api/SpeakService"
+    // );
+    // console.log(response.data);
+    // return response;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error("Erro na requisição:", error.message);
+      console.error("Status do erro:", error.response?.status);
+      console.error("Dados do erro:", error.response?.data);
+    }
+    console.log(error);
+  }
 };
 
 export const useAudioMutate = () => {

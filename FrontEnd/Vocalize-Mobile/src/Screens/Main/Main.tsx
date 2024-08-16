@@ -22,6 +22,7 @@ import { useAudioMutate } from "../../Hooks/useAudioMute";
 import { useTextMutate } from "../../Hooks/useTextMutate";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import * as FileSystem from "expo-file-system";
 
 type FormValues = z.infer<typeof inputSchema>;
 
@@ -41,7 +42,6 @@ const Main = () => {
     data: audioData,
     isError: isErrorAudio,
   } = useAudioMutate();
-
   const {
     mutate: textMutate,
     data: textData,
@@ -58,11 +58,6 @@ const Main = () => {
     resolver: zodResolver(inputSchema),
   });
 
-  const handlePostAudio = (audio: File) => {
-    const formData = new FormData();
-    const data = audio;
-    audioMutate(audio);
-  };
   const handlePostText = ({ Texto }: FormValues) => {
     textMutate(Texto);
   };
@@ -77,7 +72,6 @@ const Main = () => {
 
     if (granted) {
       try {
-        // buttonRef.current?.current?.props.onPress()
         setIsRecording(true);
         const { recording } = await Audio.Recording.createAsync();
         setRecording(recording);
@@ -90,19 +84,46 @@ const Main = () => {
     }
   };
 
+  // Função para criar um Blob a partir da URI
+  const createBlobFromUri = async (uri: string): Promise<Blob> => {
+    const response = await FileSystem.readAsStringAsync(uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    return new Blob([response], { type: `audio/${uri.split(".").pop()}` });
+  };
+
+  const handlePostAudio = async (uri: string) => {
+    const formData = new FormData();
+
+    const blob = await createBlobFromUri(uri);
+    console.log(uri);
+    // formData.append("File", blob, `audio.${uri.split(".").pop()}`);
+    //FOI ASSIM, MAS ESTÁ DANDO ERRO AO PASSAR DE .3GP PARA .WAV
+    formData.append(
+      "File",
+      JSON.parse(
+        JSON.stringify({
+          name: `audio.${uri.split(".").pop()}`,
+          type: `audio/${uri.split(".").pop()}`,
+          uri,
+        })
+      )
+    );
+
+    // formData.append("File", uri);
+    audioMutate(formData);
+  };
+
   const pararGravacaoDeAudio = async () => {
     try {
       if (recording) {
         await recording.stopAndUnloadAsync();
-        const fileUri = recording.getURI();
+        const fileUri = recording.getURI()!; //colocar o "!" funciona em typescript também, não só no c#
 
-        console.log(fileUri);
+        await handlePostAudio(fileUri);
+
         setRecordingFileUri(fileUri);
         limparCampos();
-
-        // const audio = new File();
-
-        // handlePostAudio(audio);
       }
     } catch (error) {
       Alert.alert("Erro ao pausar!", "Nao foi possivel pausar a gravacao.");
@@ -214,9 +235,12 @@ const Main = () => {
     };
   });
 
+  // useEffect(() => {
+  //   console.log("textData:", textData?.data.bytesAudio);
+  // }, [textData]);
   useEffect(() => {
-    console.log("textData:", textData?.data.bytesAudio);
-  }, [textData]);
+    console.log("audioData:", audioData?.data.texto);
+  }, [audioData]);
 
   return (
     <SafeAreaView style={styles.safeArea}>

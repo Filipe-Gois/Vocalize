@@ -23,7 +23,6 @@ namespace Vocalize_Api.Repositories
                 throw new Exception("Informe um arquivo de áudio!");
             }
 
-
             string caminhoDoArquivo = await GlobalFunctions.SalvarArquivoNoRoot(file);
 
             SpeechConfig speechConfig = SpeechConfig.FromSubscription(speechKey, speechRegion);
