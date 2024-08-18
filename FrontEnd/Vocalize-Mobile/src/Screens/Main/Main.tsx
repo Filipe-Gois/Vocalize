@@ -105,7 +105,7 @@ const Main = () => {
         JSON.stringify({
           name: `audio.${uri.split(".").pop()}`,
           type: `audio/${uri.split(".").pop()}`,
-          uri,
+          uri: uri,
         })
       )
     );

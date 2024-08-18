@@ -6,7 +6,7 @@ import axios, { AxiosPromise } from "axios";
 
 //: AxiosPromise<TextResponse>
 const handlePost = async (audioFormData: FormData) => {
-  console.log("teste");
+  console.log("teste", audioFormData.getAll("File"));
   try {
     const response = await api.postForm<TextResponse>(
       speechToText,

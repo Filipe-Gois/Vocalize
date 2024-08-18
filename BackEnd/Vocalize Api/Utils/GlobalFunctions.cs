@@ -35,7 +35,8 @@ namespace Vocalize_Api.Utils
             if (Path.GetExtension(file.File!.FileName) != ".wav")
             {
 
-                string caminhoDoArquivoConvertido = ConverterArquivoParaFormatoWav(caminhoDoArquivo, diretorioRoot);
+                string caminhoDoArquivoConvertido = Conversor(caminhoDoArquivo, diretorioRoot);
+                //string caminhoDoArquivoConvertido = ConverterArquivoParaFormatoWav(caminhoDoArquivo, diretorioRoot);
                 //exclui o arquivo em formato diferente de .wav
                 File.Delete(caminhoDoArquivo);
                 return caminhoDoArquivoConvertido;
@@ -69,6 +70,31 @@ namespace Vocalize_Api.Utils
 
                 throw new Exception("Erro ao converter arquivo para .wav!");
             }
+        }
+
+        public static string Conversor(string caminhoOriginal, string caminhoConversao)
+        {
+            try
+            {
+                //Abre o arquivo de áudio de entrada
+                using (var reader = new MediaFoundationReader(caminhoOriginal))
+                {
+                    // Cria um novo arquivo WAV para escrita
+                    using (var writer = new WaveFileWriter(caminhoConversao, reader.WaveFormat))
+                    {
+                        // Copia os dados de áudio do arquivo de entrada para o arquivo WAV
+                        reader.CopyTo(writer);
+
+                        return caminhoConversao;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+                throw new Exception("Erro ao converter arquivo para .wav!");
+            }
+
         }
         public static string ValidarRespostaDoAudio(SpeechRecognitionResult result)
         {

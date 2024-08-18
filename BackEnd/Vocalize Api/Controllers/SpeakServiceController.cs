@@ -46,21 +46,5 @@ namespace Vocalize_Api.Controllers
                 return BadRequest(e.Message);
             }
         }
-
-        [HttpGet]
-        public async Task<IActionResult> Teste()
-        {
-            try
-            {
-                
-
-                return StatusCode(200, new {texto = "teste do fefe"});
-            }
-            catch (Exception e)
-            {
-
-                return BadRequest(e.Message);
-            }
-        }
     }
 }
